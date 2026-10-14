@@ -1,4 +1,5 @@
-﻿import tkinter as tk
+﻿
+import tkinter as tk
 from tkinter import ttk, messagebox
 from threading import Thread
 import re
@@ -8,10 +9,7 @@ from src.consulta_cnpj import consultar_cnpj
 
 
 def cnpj_valido(cnpj):
-    """
-    Valida o formato e os dígitos verificadores do CNPJ.
-    Aceita CNPJ com ou sem pontuação.
-    """
+    """Valida o CNPJ e seus dígitos verificadores."""
     cnpj = re.sub(r"\D", "", str(cnpj))
 
     if len(cnpj) != 14:
@@ -25,9 +23,7 @@ def cnpj_valido(cnpj):
             int(numero) * peso
             for numero, peso in zip(numeros, pesos)
         )
-
         resto = soma % 11
-
         return "0" if resto < 2 else str(11 - resto)
 
     primeiro_digito = calcular_digito(
@@ -44,11 +40,8 @@ def cnpj_valido(cnpj):
 
 
 def normalizar_endereco(endereco):
-    """
-    Remove espaços duplicados, tabulações e quebras de linha,
-    preservando as palavras e a pontuação do endereço.
-    """
-    return re.sub(r"\s+", " ", str(endereco)).strip()
+    """Remove espaços duplicados e quebras de linha."""
+    return re.sub(r"\s+", " ", str(endereco or "")).strip()
 
 
 def iniciar_interface():
@@ -63,17 +56,14 @@ def iniciar_interface():
         "Titulo.TLabel",
         font=("Segoe UI", 18, "bold")
     )
-
     estilo.configure(
         "Subtitulo.TLabel",
         font=("Segoe UI", 10)
     )
-
     estilo.configure(
         "Secao.TLabel",
         font=("Segoe UI", 12, "bold")
     )
-
     estilo.configure(
         "Acao.TButton",
         font=("Segoe UI", 11, "bold")
@@ -86,10 +76,7 @@ def iniciar_interface():
     container = ttk.Frame(janela)
     container.pack(fill="both", expand=True)
 
-    canvas = tk.Canvas(
-        container,
-        highlightthickness=0
-    )
+    canvas = tk.Canvas(container, highlightthickness=0)
 
     barra = ttk.Scrollbar(
         container,
@@ -97,10 +84,7 @@ def iniciar_interface():
         command=canvas.yview
     )
 
-    conteudo = ttk.Frame(
-        canvas,
-        padding=24
-    )
+    conteudo = ttk.Frame(canvas, padding=24)
 
     janela_conteudo = canvas.create_window(
         (0, 0),
@@ -108,14 +92,10 @@ def iniciar_interface():
         anchor="nw"
     )
 
-    canvas.configure(
-        yscrollcommand=barra.set
-    )
+    canvas.configure(yscrollcommand=barra.set)
 
     def atualizar_rolagem(event=None):
-        canvas.configure(
-            scrollregion=canvas.bbox("all")
-        )
+        canvas.configure(scrollregion=canvas.bbox("all"))
 
     def ajustar_largura(event):
         canvas.itemconfigure(
@@ -123,26 +103,11 @@ def iniciar_interface():
             width=event.width
         )
 
-    conteudo.bind(
-        "<Configure>",
-        atualizar_rolagem
-    )
+    conteudo.bind("<Configure>", atualizar_rolagem)
+    canvas.bind("<Configure>", ajustar_largura)
 
-    canvas.bind(
-        "<Configure>",
-        ajustar_largura
-    )
-
-    canvas.pack(
-        side="left",
-        fill="both",
-        expand=True
-    )
-
-    barra.pack(
-        side="right",
-        fill="y"
-    )
+    canvas.pack(side="left", fill="both", expand=True)
+    barra.pack(side="right", fill="y")
 
     # ==========================================
     # ROLAGEM COM A RODINHA DO MOUSE
@@ -156,23 +121,13 @@ def iniciar_interface():
             )
 
     def ativar_rolagem(event=None):
-        janela.bind_all(
-            "<MouseWheel>",
-            rolar_com_mouse
-        )
+        janela.bind_all("<MouseWheel>", rolar_com_mouse)
 
     def desativar_rolagem(event=None):
         janela.unbind_all("<MouseWheel>")
 
-    canvas.bind(
-        "<Enter>",
-        ativar_rolagem
-    )
-
-    canvas.bind(
-        "<Leave>",
-        desativar_rolagem
-    )
+    canvas.bind("<Enter>", ativar_rolagem)
+    canvas.bind("<Leave>", desativar_rolagem)
 
     # ==========================================
     # CABEÇALHO
@@ -188,57 +143,12 @@ def iniciar_interface():
         conteudo,
         text="CONTTY FINANÇAS CORPORATIVAS LTDA",
         style="Subtitulo.TLabel"
-    ).pack(
-        anchor="w",
-        pady=(2, 20)
-    )
+    ).pack(anchor="w", pady=(2, 20))
 
     campos = {}
 
     # ==========================================
-    # BOTÃO DE CONSULTA DO CNPJ
-    # ==========================================
-
-    def criar_botao_consulta():
-        botao = tk.Button(
-            conteudo,
-            text="🔎  Pesquisar CNPJ",
-            font=("Segoe UI", 11, "bold"),
-            bg="#2563EB",
-            fg="white",
-            activebackground="#1D4ED8",
-            activeforeground="white",
-            disabledforeground="white",
-            relief="flat",
-            cursor="hand2",
-            padx=10,
-            pady=7,
-            borderwidth=0
-        )
-
-        botao.pack(
-            anchor="w",
-            pady=(4, 14)
-        )
-
-        botao.bind(
-            "<Enter>",
-            lambda event: botao.config(
-                bg="#1D4ED8"
-            ) if botao["state"] != "disabled" else None
-        )
-
-        botao.bind(
-            "<Leave>",
-            lambda event: botao.config(
-                bg="#2563EB"
-            ) if botao["state"] != "disabled" else None
-        )
-
-        return botao
-
-    # ==========================================
-    # CRIAÇÃO DE SEÇÕES
+    # SEÇÕES E CAMPOS
     # ==========================================
 
     def adicionar_secao(titulo):
@@ -246,62 +156,37 @@ def iniciar_interface():
             conteudo,
             text=titulo,
             style="Secao.TLabel"
-        ).pack(
-            anchor="w",
-            pady=(12, 8)
-        )
+        ).pack(anchor="w", pady=(12, 8))
 
         ttk.Separator(conteudo).pack(
             fill="x",
             pady=(0, 12)
         )
 
-    # ==========================================
-    # CRIAÇÃO DOS CAMPOS
-    # ==========================================
-
     def adicionar_campo(chave, rotulo, dica=""):
-        ttk.Label(
-            conteudo,
-            text=rotulo
-        ).pack(anchor="w")
+        ttk.Label(conteudo, text=rotulo).pack(anchor="w")
 
         entrada = ttk.Entry(conteudo)
-
-        entrada.pack(
-            fill="x",
-            pady=(4, 2)
-        )
+        entrada.pack(fill="x", pady=(4, 2))
 
         if dica:
             ttk.Label(
                 conteudo,
                 text=dica,
                 style="Subtitulo.TLabel"
-            ).pack(
-                anchor="w",
-                pady=(0, 8)
-            )
+            ).pack(anchor="w", pady=(0, 8))
         else:
-            ttk.Frame(
-                conteudo,
-                height=8
-            ).pack()
+            ttk.Frame(conteudo, height=8).pack()
 
         campos[chave] = entrada
 
     # ==========================================
-    # SEÇÃO 1: DADOS DA EMPRESA
+    # DADOS DA EMPRESA
     # ==========================================
 
-    adicionar_secao(
-        "1. Dados da empresa contratante"
-    )
+    adicionar_secao("1. Dados da empresa contratante")
 
-    adicionar_campo(
-        "nome_empresa",
-        "Razão social"
-    )
+    adicionar_campo("nome_empresa", "Razão social")
 
     adicionar_campo(
         "cnpj",
@@ -309,11 +194,22 @@ def iniciar_interface():
         "Exemplo: 00.000.000/0000-00"
     )
 
-    botao_consultar = criar_botao_consulta()
-
-    # ==========================================
-    # CONSULTA DO CNPJ
-    # ==========================================
+    botao_consultar = tk.Button(
+        conteudo,
+        text="🔎  Pesquisar CNPJ",
+        font=("Segoe UI", 11, "bold"),
+        bg="#2563EB",
+        fg="white",
+        activebackground="#1D4ED8",
+        activeforeground="white",
+        disabledforeground="white",
+        relief="flat",
+        cursor="hand2",
+        padx=10,
+        pady=7,
+        borderwidth=0
+    )
+    botao_consultar.pack(anchor="w", pady=(4, 14))
 
     def ao_consultar_cnpj():
         cnpj = campos["cnpj"].get().strip()
@@ -330,8 +226,7 @@ def iniciar_interface():
         if not cnpj_valido(cnpj_limpo):
             messagebox.showwarning(
                 "CNPJ inválido",
-                "O CNPJ informado é inválido.\n\n"
-                "Confira os 14 dígitos e tente novamente.",
+                "Confira os 14 dígitos do CNPJ.",
                 parent=janela
             )
             return
@@ -349,7 +244,6 @@ def iniciar_interface():
 
             try:
                 dados_empresa = consultar_cnpj(cnpj_limpo)
-
             except Exception as exc:
                 erro = str(exc)
 
@@ -360,7 +254,6 @@ def iniciar_interface():
                 except tk.TclError:
                     return
 
-                # Reativa o botão após sucesso ou erro
                 botao_consultar.config(
                     state="normal",
                     text="🔎  Pesquisar CNPJ",
@@ -377,45 +270,41 @@ def iniciar_interface():
                     )
                     return
 
-                # Preenche os dados retornados pela API
-                for chave in (
+                # Campos que podem ser preenchidos pela API.
+                campos_consulta = (
                     "nome_empresa",
                     "cnpj",
                     "endereco",
-                    "cep"
-                ):
+                    "cep",
+                    "representante",
+                    "cpf_representante",
+                    "cnh_representante",
+                    "nacionalidade",
+                    "profissao",
+                )
+
+                for chave in campos_consulta:
                     valor = dados_empresa.get(chave, "")
 
                     if not valor or chave not in campos:
                         continue
 
-                    # Corrige espaços repetidos no endereço
                     if chave == "endereco":
                         valor = normalizar_endereco(valor)
 
-                    campos[chave].delete(
-                        0,
-                        tk.END
-                    )
-
-                    campos[chave].insert(
-                        0,
-                        str(valor)
-                    )
+                    campos[chave].delete(0, tk.END)
+                    campos[chave].insert(0, str(valor))
 
                 messagebox.showinfo(
                     "Consulta concluída",
-                    "Dados cadastrais preenchidos com sucesso!\n\n"
-                    "Confira as informações antes de gerar o contrato.",
+                    "Dados disponíveis preenchidos com sucesso!\n\n"
+                    "Confira os dados do representante e da empresa "
+                    "antes de gerar o contrato.",
                     parent=janela
                 )
 
-            # Atualiza a interface somente na thread principal
             try:
-                janela.after(
-                    0,
-                    finalizar_consulta
-                )
+                janela.after(0, finalizar_consulta)
             except tk.TclError:
                 pass
 
@@ -424,14 +313,9 @@ def iniciar_interface():
             daemon=True
         ).start()
 
-    botao_consultar.config(
-        command=ao_consultar_cnpj
-    )
+    botao_consultar.config(command=ao_consultar_cnpj)
 
-    adicionar_campo(
-        "endereco",
-        "Endereço completo"
-    )
+    adicionar_campo("endereco", "Endereço completo")
 
     adicionar_campo(
         "cep",
@@ -440,17 +324,12 @@ def iniciar_interface():
     )
 
     # ==========================================
-    # SEÇÃO 2: REPRESENTANTE LEGAL
+    # REPRESENTANTE LEGAL
     # ==========================================
 
-    adicionar_secao(
-        "2. Representante legal"
-    )
+    adicionar_secao("2. Representante legal")
 
-    adicionar_campo(
-        "representante",
-        "Nome completo"
-    )
+    adicionar_campo("representante", "Nome completo")
 
     adicionar_campo(
         "cpf_representante",
@@ -459,22 +338,23 @@ def iniciar_interface():
     )
 
     adicionar_campo(
-        "nacionalidade",
-        "Nacionalidade"
+        "cnh_representante",
+        "CNH do representante (opcional)"
     )
+
+    adicionar_campo("nacionalidade", "Nacionalidade")
 
     adicionar_campo(
         "profissao",
-        "Profissão ou qualificação"
+        "Profissão ou qualificação",
+        "A profissão será preenchida como Empresário pela consulta."
     )
 
     # ==========================================
-    # SEÇÃO 3: DADOS CONTRATUAIS
+    # DADOS CONTRATUAIS
     # ==========================================
 
-    adicionar_secao(
-        "3. Dados contratuais"
-    )
+    adicionar_secao("3. Dados contratuais")
 
     adicionar_campo(
         "valor_mensal",
@@ -495,7 +375,7 @@ def iniciar_interface():
     )
 
     # ==========================================
-    # AÇÕES DO FORMULÁRIO
+    # GERAÇÃO DO CONTRATO
     # ==========================================
 
     ttk.Separator(conteudo).pack(
@@ -509,8 +389,6 @@ def iniciar_interface():
             for chave, entrada in campos.items()
         }
 
-        # Normaliza o endereço mesmo se ele tiver sido editado
-        # manualmente depois da consulta.
         if dados.get("endereco"):
             dados["endereco"] = normalizar_endereco(
                 dados["endereco"]
@@ -538,17 +416,12 @@ def iniciar_interface():
 
         messagebox.showinfo(
             "Contrato gerado com sucesso",
-            f"O contrato foi criado!\n\n"
-            f"Arquivo:\n{caminho}",
+            f"O contrato foi criado!\n\nArquivo:\n{caminho}",
             parent=janela
         )
 
     botoes = ttk.Frame(conteudo)
-
-    botoes.pack(
-        fill="x",
-        pady=(0, 12)
-    )
+    botoes.pack(fill="x", pady=(0, 12))
 
     ttk.Button(
         botoes,
@@ -566,10 +439,10 @@ def iniciar_interface():
         botoes,
         text="Sair",
         command=janela.destroy
-    ).pack(
-        side="left",
-        padx=(6, 0),
-        ipadx=20
-    )
+    ).pack(side="left", padx=(6, 0), ipadx=20)
 
     janela.mainloop()
+
+
+if __name__ == "__main__":
+    iniciar_interface()
