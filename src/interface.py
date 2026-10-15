@@ -1,10 +1,11 @@
 ﻿import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 from threading import Thread
 import re
 
 from src.gerador_contrato import gerar_contrato
 from src.consulta_cnpj import consultar_cnpj
+from src.leitor_documentos import ler_documento
 
 
 def cnpj_valido(cnpj):
@@ -55,14 +56,17 @@ def iniciar_interface():
         "Titulo.TLabel",
         font=("Segoe UI", 18, "bold")
     )
+
     estilo.configure(
         "Subtitulo.TLabel",
         font=("Segoe UI", 10)
     )
+
     estilo.configure(
         "Secao.TLabel",
         font=("Segoe UI", 12, "bold")
     )
+
     estilo.configure(
         "Acao.TButton",
         font=("Segoe UI", 11, "bold")
@@ -75,7 +79,10 @@ def iniciar_interface():
     container = ttk.Frame(janela)
     container.pack(fill="both", expand=True)
 
-    canvas = tk.Canvas(container, highlightthickness=0)
+    canvas = tk.Canvas(
+        container,
+        highlightthickness=0
+    )
 
     barra = ttk.Scrollbar(
         container,
@@ -83,7 +90,10 @@ def iniciar_interface():
         command=canvas.yview
     )
 
-    conteudo = ttk.Frame(canvas, padding=24)
+    conteudo = ttk.Frame(
+        canvas,
+        padding=24
+    )
 
     janela_conteudo = canvas.create_window(
         (0, 0),
@@ -91,10 +101,14 @@ def iniciar_interface():
         anchor="nw"
     )
 
-    canvas.configure(yscrollcommand=barra.set)
+    canvas.configure(
+        yscrollcommand=barra.set
+    )
 
     def atualizar_rolagem(event=None):
-        canvas.configure(scrollregion=canvas.bbox("all"))
+        canvas.configure(
+            scrollregion=canvas.bbox("all")
+        )
 
     def ajustar_largura(event):
         canvas.itemconfigure(
@@ -102,11 +116,26 @@ def iniciar_interface():
             width=event.width
         )
 
-    conteudo.bind("<Configure>", atualizar_rolagem)
-    canvas.bind("<Configure>", ajustar_largura)
+    conteudo.bind(
+        "<Configure>",
+        atualizar_rolagem
+    )
 
-    canvas.pack(side="left", fill="both", expand=True)
-    barra.pack(side="right", fill="y")
+    canvas.bind(
+        "<Configure>",
+        ajustar_largura
+    )
+
+    canvas.pack(
+        side="left",
+        fill="both",
+        expand=True
+    )
+
+    barra.pack(
+        side="right",
+        fill="y"
+    )
 
     # ==========================================
     # ROLAGEM COM A RODINHA DO MOUSE
@@ -120,13 +149,23 @@ def iniciar_interface():
             )
 
     def ativar_rolagem(event=None):
-        janela.bind_all("<MouseWheel>", rolar_com_mouse)
+        janela.bind_all(
+            "<MouseWheel>",
+            rolar_com_mouse
+        )
 
     def desativar_rolagem(event=None):
         janela.unbind_all("<MouseWheel>")
 
-    canvas.bind("<Enter>", ativar_rolagem)
-    canvas.bind("<Leave>", desativar_rolagem)
+    canvas.bind(
+        "<Enter>",
+        ativar_rolagem
+    )
+
+    canvas.bind(
+        "<Leave>",
+        desativar_rolagem
+    )
 
     # ==========================================
     # CABEÇALHO
@@ -142,12 +181,15 @@ def iniciar_interface():
         conteudo,
         text="CONTTY FINANÇAS CORPORATIVAS LTDA",
         style="Subtitulo.TLabel"
-    ).pack(anchor="w", pady=(2, 20))
+    ).pack(
+        anchor="w",
+        pady=(2, 20)
+    )
 
     campos = {}
 
     # ==========================================
-    # SEÇÕES E CAMPOS
+    # FUNÇÕES PARA CRIAR SEÇÕES E CAMPOS
     # ==========================================
 
     def adicionar_secao(titulo):
@@ -155,7 +197,10 @@ def iniciar_interface():
             conteudo,
             text=titulo,
             style="Secao.TLabel"
-        ).pack(anchor="w", pady=(12, 8))
+        ).pack(
+            anchor="w",
+            pady=(12, 8)
+        )
 
         ttk.Separator(conteudo).pack(
             fill="x",
@@ -163,29 +208,47 @@ def iniciar_interface():
         )
 
     def adicionar_campo(chave, rotulo, dica=""):
-        ttk.Label(conteudo, text=rotulo).pack(anchor="w")
+        ttk.Label(
+            conteudo,
+            text=rotulo
+        ).pack(anchor="w")
 
         entrada = ttk.Entry(conteudo)
-        entrada.pack(fill="x", pady=(4, 2))
+
+        entrada.pack(
+            fill="x",
+            pady=(4, 2)
+        )
 
         if dica:
             ttk.Label(
                 conteudo,
                 text=dica,
                 style="Subtitulo.TLabel"
-            ).pack(anchor="w", pady=(0, 8))
+            ).pack(
+                anchor="w",
+                pady=(0, 8)
+            )
         else:
-            ttk.Frame(conteudo, height=8).pack()
+            ttk.Frame(
+                conteudo,
+                height=8
+            ).pack()
 
         campos[chave] = entrada
 
     # ==========================================
-    # DADOS DA EMPRESA
+    # 1. DADOS DA EMPRESA
     # ==========================================
 
-    adicionar_secao("1. Dados da empresa contratante")
+    adicionar_secao(
+        "1. Dados da empresa contratante"
+    )
 
-    adicionar_campo("nome_empresa", "Razão social")
+    adicionar_campo(
+        "nome_empresa",
+        "Razão social"
+    )
 
     adicionar_campo(
         "cnpj",
@@ -208,7 +271,11 @@ def iniciar_interface():
         pady=7,
         borderwidth=0
     )
-    botao_consultar.pack(anchor="w", pady=(4, 14))
+
+    botao_consultar.pack(
+        anchor="w",
+        pady=(4, 14)
+    )
 
     def ao_consultar_cnpj():
         cnpj = campos["cnpj"].get().strip()
@@ -242,7 +309,9 @@ def iniciar_interface():
             erro = None
 
             try:
-                dados_empresa = consultar_cnpj(cnpj_limpo)
+                dados_empresa = consultar_cnpj(
+                    cnpj_limpo
+                )
             except Exception as exc:
                 erro = str(exc)
 
@@ -261,27 +330,45 @@ def iniciar_interface():
                 )
 
                 if erro:
-                    print("DEBUG - Erro na consulta:", erro)
+                    print(
+                        "DEBUG - Erro na consulta:",
+                        erro
+                    )
 
                     messagebox.showerror(
                         "Falha na consulta",
                         f"{erro}\n\n"
-                        "Verifique o CNPJ ou tente novamente mais tarde.",
+                        "Verifique o CNPJ ou tente novamente "
+                        "mais tarde.",
                         parent=janela
                     )
                     return
 
-                # ==========================================
-                # DIAGNÓSTICO DOS DADOS RECEBIDOS
-                # ==========================================
+                if not isinstance(dados_empresa, dict):
+                    messagebox.showerror(
+                        "Resposta inválida",
+                        "A consulta não retornou os dados "
+                        "no formato esperado.",
+                        parent=janela
+                    )
+                    return
 
-                print("\n========== DIAGNÓSTICO CNPJ ==========")
-                print("DEBUG - Dados recebidos da API:", dados_empresa)
+                # Diagnóstico dos dados recebidos.
+                print(
+                    "\n========== DIAGNÓSTICO CNPJ =========="
+                )
+
+                print(
+                    "DEBUG - Dados recebidos da API:",
+                    dados_empresa
+                )
+
                 print(
                     "DEBUG - Representante recebido:",
-                    repr(dados_empresa.get("representante"))
+                    repr(
+                        dados_empresa.get("representante")
+                    )
                 )
-                print("======================================\n")
 
                 # Campos que podem ser preenchidos pela API.
                 campos_consulta = (
@@ -297,23 +384,40 @@ def iniciar_interface():
                 )
 
                 for chave in campos_consulta:
-                    valor = dados_empresa.get(chave, "")
+                    valor = dados_empresa.get(
+                        chave,
+                        ""
+                    )
 
                     print(
                         f"DEBUG - Campo: {chave} | "
                         f"Valor recebido: {repr(valor)} | "
-                        f"Existe na interface: {chave in campos}"
+                        f"Existe na interface: "
+                        f"{chave in campos}"
                     )
 
-                    if not valor or chave not in campos:
+                    if (
+                        valor is None
+                        or not str(valor).strip()
+                        or chave not in campos
+                    ):
                         continue
 
                     if chave == "endereco":
-                        valor = normalizar_endereco(valor)
+                        valor = normalizar_endereco(
+                            valor
+                        )
 
                     try:
-                        campos[chave].delete(0, tk.END)
-                        campos[chave].insert(0, str(valor))
+                        campos[chave].delete(
+                            0,
+                            tk.END
+                        )
+
+                        campos[chave].insert(
+                            0,
+                            str(valor)
+                        )
 
                         print(
                             f"DEBUG - Campo {chave} preenchido."
@@ -325,18 +429,23 @@ def iniciar_interface():
                             f"{chave}: {exc}"
                         )
 
-                print("========== FIM DO DIAGNÓSTICO ==========\n")
+                print(
+                    "========== FIM DO DIAGNÓSTICO ==========\n"
+                )
 
                 messagebox.showinfo(
                     "Consulta concluída",
                     "Dados disponíveis preenchidos com sucesso!\n\n"
-                    "Confira os dados do representante e da empresa "
-                    "antes de gerar o contrato.",
+                    "Confira os dados do representante e da "
+                    "empresa antes de gerar o contrato.",
                     parent=janela
                 )
 
             try:
-                janela.after(0, finalizar_consulta)
+                janela.after(
+                    0,
+                    finalizar_consulta
+                )
             except tk.TclError:
                 pass
 
@@ -345,9 +454,14 @@ def iniciar_interface():
             daemon=True
         ).start()
 
-    botao_consultar.config(command=ao_consultar_cnpj)
+    botao_consultar.config(
+        command=ao_consultar_cnpj
+    )
 
-    adicionar_campo("endereco", "Endereço completo")
+    adicionar_campo(
+        "endereco",
+        "Endereço completo"
+    )
 
     adicionar_campo(
         "cep",
@@ -356,12 +470,17 @@ def iniciar_interface():
     )
 
     # ==========================================
-    # REPRESENTANTE LEGAL
+    # 2. REPRESENTANTE LEGAL
     # ==========================================
 
-    adicionar_secao("2. Representante legal")
+    adicionar_secao(
+        "2. Representante legal"
+    )
 
-    adicionar_campo("representante", "Nome completo")
+    adicionar_campo(
+        "representante",
+        "Nome completo"
+    )
 
     adicionar_campo(
         "cpf_representante",
@@ -370,11 +489,20 @@ def iniciar_interface():
     )
 
     adicionar_campo(
+        "data_nascimento",
+        "Data de nascimento",
+        "Formato: DD/MM/AAAA"
+    )
+
+    adicionar_campo(
         "cnh_representante",
         "CNH do representante (opcional)"
     )
 
-    adicionar_campo("nacionalidade", "Nacionalidade")
+    adicionar_campo(
+        "nacionalidade",
+        "Nacionalidade"
+    )
 
     adicionar_campo(
         "profissao",
@@ -383,10 +511,113 @@ def iniciar_interface():
     )
 
     # ==========================================
-    # DADOS CONTRATUAIS
+    # IMPORTAR DADOS DA CNH
     # ==========================================
 
-    adicionar_secao("3. Dados contratuais")
+    def importar_cnh():
+        arquivo_pdf = filedialog.askopenfilename(
+            title="Selecione a CNH em PDF",
+            filetypes=[
+                ("Arquivos PDF", "*.pdf")
+            ],
+            parent=janela
+        )
+
+        if not arquivo_pdf:
+            return
+
+        try:
+            resultado = ler_documento(
+                arquivo_pdf
+            )
+
+            mapeamento = {
+                "nome_representante": "representante",
+                "cpf_representante": "cpf_representante",
+                "data_nascimento": "data_nascimento",
+            }
+
+            preenchidos = []
+
+            for chave_resultado, chave_campo in mapeamento.items():
+                valor = resultado.get(
+                    chave_resultado,
+                    ""
+                )
+
+                if (
+                    valor is None
+                    or not str(valor).strip()
+                    or chave_campo not in campos
+                ):
+                    continue
+
+                entrada = campos[chave_campo]
+
+                entrada.delete(
+                    0,
+                    tk.END
+                )
+
+                entrada.insert(
+                    0,
+                    str(valor)
+                )
+
+                preenchidos.append(
+                    chave_campo
+                )
+
+            if not preenchidos:
+                messagebox.showwarning(
+                    "Dados não identificados",
+                    "Não foi possível identificar os dados da CNH. "
+                    "Preencha os campos manualmente.",
+                    parent=janela
+                )
+                return
+
+            messagebox.showinfo(
+                "Leitura concluída",
+                "Dados importados para a interface.\n\n"
+                "Confira todas as informações antes de "
+                "gerar o contrato.",
+                parent=janela
+            )
+
+        except Exception as erro:
+            messagebox.showerror(
+                "Erro ao ler a CNH",
+                "Não foi possível processar o documento:\n"
+                f"{erro}",
+                parent=janela
+            )
+
+    tk.Button(
+        conteudo,
+        text="📄 Importar CNH em PDF",
+        command=importar_cnh,
+        font=("Segoe UI", 10, "bold"),
+        bg="#0F766E",
+        fg="white",
+        activebackground="#115E59",
+        activeforeground="white",
+        relief="flat",
+        cursor="hand2",
+        padx=12,
+        pady=8
+    ).pack(
+        anchor="w",
+        pady=(4, 14)
+    )
+
+    # ==========================================
+    # 3. DADOS CONTRATUAIS
+    # ==========================================
+
+    adicionar_secao(
+        "3. Dados contratuais"
+    )
 
     adicionar_campo(
         "valor_mensal",
@@ -407,7 +638,7 @@ def iniciar_interface():
     )
 
     # ==========================================
-    # GERAÇÃO DO CONTRATO
+    # 4. GERAÇÃO DO CONTRATO
     # ==========================================
 
     ttk.Separator(conteudo).pack(
@@ -427,9 +658,14 @@ def iniciar_interface():
             )
 
         try:
-            caminho = gerar_contrato(dados)
+            caminho = gerar_contrato(
+                dados
+            )
 
-        except (ValueError, FileNotFoundError) as erro:
+        except (
+            ValueError,
+            FileNotFoundError
+        ) as erro:
             messagebox.showerror(
                 "Não foi possível gerar o contrato",
                 str(erro),
@@ -448,12 +684,19 @@ def iniciar_interface():
 
         messagebox.showinfo(
             "Contrato gerado com sucesso",
-            f"O contrato foi criado!\n\nArquivo:\n{caminho}",
+            "O contrato foi criado!\n\n"
+            f"Arquivo:\n{caminho}",
             parent=janela
         )
 
-    botoes = ttk.Frame(conteudo)
-    botoes.pack(fill="x", pady=(0, 12))
+    botoes = ttk.Frame(
+        conteudo
+    )
+
+    botoes.pack(
+        fill="x",
+        pady=(0, 12)
+    )
 
     ttk.Button(
         botoes,
@@ -471,7 +714,11 @@ def iniciar_interface():
         botoes,
         text="Sair",
         command=janela.destroy
-    ).pack(side="left", padx=(6, 0), ipadx=20)
+    ).pack(
+        side="left",
+        padx=(6, 0),
+        ipadx=20
+    )
 
     janela.mainloop()
 

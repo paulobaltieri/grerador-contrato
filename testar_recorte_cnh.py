@@ -40,7 +40,7 @@ with pymupdf.open(arquivo) as documento:
     )
 
     # Recorte da região dos campos da CNH.
-    recorte = imagem.crop((350, 430, 900, 570))
+    recorte = imagem.crop((150, 220, 1200, 430))
 
     recorte = ImageOps.grayscale(recorte)
     recorte = ImageEnhance.Contrast(recorte).enhance(2)

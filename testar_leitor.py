@@ -1,6 +1,7 @@
+
 from tkinter import Tk, filedialog
 
-from src.leitor_documentos import ler_documento
+from src.leitor_documentos import ler_documento, encontrar_nome_mrz
 
 
 def main():
@@ -22,17 +23,30 @@ def main():
         resultado = ler_documento(arquivo_pdf)
 
         print("\n--- DADOS IDENTIFICADOS ---")
+
         print(
             "Nome:",
             resultado.get("nome_representante") or "Não identificado",
         )
+
         print(
             "CPF:",
             resultado.get("cpf_representante") or "Não identificado",
         )
+
         print(
             "Data de nascimento:",
             resultado.get("data_nascimento") or "Não identificada",
+        )
+
+        # Teste separado para verificar a extração do nome pela MRZ.
+        print("\n--- TESTE DA MRZ ---")
+
+        nome_mrz = encontrar_nome_mrz(resultado.get("texto", ""))
+
+        print(
+            "Nome pela MRZ:",
+            nome_mrz or "Não identificado pela MRZ",
         )
 
     except Exception as erro:

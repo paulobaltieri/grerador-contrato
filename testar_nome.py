@@ -45,7 +45,7 @@ pasta = Path(__file__).resolve().parent
 imagem.save(pasta / "pagina_cnh_diagnostico.png")
 
 # Recorte ampliado da região que estamos investigando.
-recorte = imagem.crop((150, 220, 1200, 430))
+recorte = imagem.crop((150, 220, 1200, 400))
 recorte.save(pasta / "recorte_nome_diagnostico.png")
 
 faixas = {
