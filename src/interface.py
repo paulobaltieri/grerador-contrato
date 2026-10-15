@@ -1,5 +1,4 @@
-﻿
-import tkinter as tk
+﻿import tkinter as tk
 from tkinter import ttk, messagebox
 from threading import Thread
 import re
@@ -262,6 +261,8 @@ def iniciar_interface():
                 )
 
                 if erro:
+                    print("DEBUG - Erro na consulta:", erro)
+
                     messagebox.showerror(
                         "Falha na consulta",
                         f"{erro}\n\n"
@@ -269,6 +270,18 @@ def iniciar_interface():
                         parent=janela
                     )
                     return
+
+                # ==========================================
+                # DIAGNÓSTICO DOS DADOS RECEBIDOS
+                # ==========================================
+
+                print("\n========== DIAGNÓSTICO CNPJ ==========")
+                print("DEBUG - Dados recebidos da API:", dados_empresa)
+                print(
+                    "DEBUG - Representante recebido:",
+                    repr(dados_empresa.get("representante"))
+                )
+                print("======================================\n")
 
                 # Campos que podem ser preenchidos pela API.
                 campos_consulta = (
@@ -286,14 +299,33 @@ def iniciar_interface():
                 for chave in campos_consulta:
                     valor = dados_empresa.get(chave, "")
 
+                    print(
+                        f"DEBUG - Campo: {chave} | "
+                        f"Valor recebido: {repr(valor)} | "
+                        f"Existe na interface: {chave in campos}"
+                    )
+
                     if not valor or chave not in campos:
                         continue
 
                     if chave == "endereco":
                         valor = normalizar_endereco(valor)
 
-                    campos[chave].delete(0, tk.END)
-                    campos[chave].insert(0, str(valor))
+                    try:
+                        campos[chave].delete(0, tk.END)
+                        campos[chave].insert(0, str(valor))
+
+                        print(
+                            f"DEBUG - Campo {chave} preenchido."
+                        )
+
+                    except tk.TclError as exc:
+                        print(
+                            f"DEBUG - Erro ao preencher "
+                            f"{chave}: {exc}"
+                        )
+
+                print("========== FIM DO DIAGNÓSTICO ==========\n")
 
                 messagebox.showinfo(
                     "Consulta concluída",
